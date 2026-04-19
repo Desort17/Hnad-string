@@ -3,26 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hand Strings — Avengers AR</title>
+<title>Hand Strings — AR</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body { width:100%; height:100%; overflow:hidden; background:#000; font-family:'Courier New',monospace; }
 #wrap { position:relative; width:100vw; height:100vh; }
-
 #vid {
   position:absolute; inset:0; width:100%; height:100%;
   object-fit:cover; transform:scaleX(-1);
   filter:brightness(1.1) contrast(1.08) saturate(1.05);
 }
 #cv { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
-
-/* HUD corners */
 .corner { position:absolute; width:32px; height:32px; border-color:rgba(120,220,255,0.6); border-style:solid; }
 .corner.tl { top:14px; left:14px; border-width:2px 0 0 2px; }
 .corner.tr { top:14px; right:14px; border-width:2px 2px 0 0; }
 .corner.bl { bottom:14px; left:14px; border-width:0 0 2px 2px; }
 .corner.br { bottom:14px; right:14px; border-width:0 2px 2px 0; }
-
 #hud-top {
   position:absolute; top:14px; left:50%; transform:translateX(-50%);
   color:rgba(120,220,255,0.75); font-size:10px; letter-spacing:.3em;
@@ -39,48 +35,33 @@ html,body { width:100%; height:100%; overflow:hidden; background:#000; font-fami
   color:rgba(120,220,255,0.6); font-size:10px; letter-spacing:.15em;
   pointer-events:none;
 }
-
-/* Boot screen */
 #boot {
   position:absolute; inset:0; display:flex; flex-direction:column;
   align-items:center; justify-content:center; gap:22px;
-  background:rgba(0,0,4,0.88); z-index:20;
-  transition:opacity .8s;
+  background:rgba(0,0,4,0.88); z-index:20; transition:opacity .8s;
 }
-#boot-logo {
-  font-size:11px; letter-spacing:.4em; color:rgba(120,220,255,0.5);
-  text-transform:uppercase; margin-bottom:4px;
-}
+#boot-logo { font-size:11px; letter-spacing:.4em; color:rgba(120,220,255,0.5); text-transform:uppercase; }
 #boot-title {
-  font-size:32px; letter-spacing:.3em; color:#fff;
-  text-transform:uppercase;
-  text-shadow:0 0 40px rgba(120,220,255,0.9), 0 0 80px rgba(120,220,255,0.4);
+  font-size:32px; letter-spacing:.3em; color:#fff; text-transform:uppercase;
+  text-shadow:0 0 40px rgba(120,220,255,0.9),0 0 80px rgba(120,220,255,0.4);
 }
 #boot-sub { font-size:10px; letter-spacing:.25em; color:rgba(120,220,255,0.55); text-transform:uppercase; }
 #boot-btn {
   margin-top:10px; padding:13px 44px; background:transparent;
   border:1px solid rgba(120,220,255,0.7); color:rgba(120,220,255,0.9);
   font-family:'Courier New',monospace; font-size:11px;
-  letter-spacing:.3em; text-transform:uppercase; cursor:pointer;
-  transition:all .3s; box-shadow:0 0 20px rgba(120,220,255,0.1);
+  letter-spacing:.3em; text-transform:uppercase; cursor:pointer; transition:all .3s;
 }
-#boot-btn:hover {
-  background:rgba(120,220,255,0.08);
-  box-shadow:0 0 30px rgba(120,220,255,0.25);
-  color:#fff;
-}
+#boot-btn:hover { background:rgba(120,220,255,0.08); color:#fff; }
 #boot-err {
   font-size:11px; color:#f87171; letter-spacing:.08em; text-align:center;
-  max-width:400px; line-height:1.8; display:none;
+  max-width:420px; line-height:1.9; display:none;
   border:1px solid rgba(248,113,113,.25); padding:14px 22px;
 }
 #boot-loading { display:none; flex-direction:column; align-items:center; gap:12px; }
 #boot-lmsg { font-size:10px; color:rgba(120,220,255,0.7); letter-spacing:.25em; text-transform:uppercase; }
-
-/* Loading bar */
-#lbar-wrap { width:200px; height:1px; background:rgba(120,220,255,0.15); }
+#lbar-wrap { width:220px; height:1px; background:rgba(120,220,255,0.15); }
 #lbar { height:1px; width:0%; background:rgba(120,220,255,0.8); transition:width .4s; box-shadow:0 0 6px rgba(120,220,255,0.8); }
-
 .dots span {
   display:inline-block; width:4px; height:4px; border-radius:50%;
   background:rgba(120,220,255,0.7); margin:0 3px; opacity:.15;
@@ -95,13 +76,11 @@ html,body { width:100%; height:100%; overflow:hidden; background:#000; font-fami
 <div id="wrap">
   <video id="vid" autoplay playsinline muted></video>
   <canvas id="cv"></canvas>
-
   <div class="corner tl"></div><div class="corner tr"></div>
   <div class="corner bl"></div><div class="corner br"></div>
   <div id="hud-top">STARK INDUSTRIES · HAND INTERFACE v2.4</div>
   <div id="hud-bottom">SNAP FINGERS TO PLUCK · SWIPE TO STRUM</div>
   <div id="hand-count">HANDS: 0</div>
-
   <div id="boot">
     <div id="boot-logo">Stark Industries</div>
     <div id="boot-title">Hand Strings</div>
@@ -116,15 +95,24 @@ html,body { width:100%; height:100%; overflow:hidden; background:#000; font-fami
   </div>
 </div>
 
-<script src="https://unpkg.com/@tensorflow/tfjs-core@3.21.0/dist/tf-core.min.js"></script>
-<script src="https://unpkg.com/@tensorflow/tfjs-converter@3.21.0/dist/tf-converter.min.js"></script>
-<script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.21.0/dist/tf-backend-webgl.min.js"></script>
-<script src="https://unpkg.com/@tensorflow-models/handpose@0.1.7/dist/handpose.min.js"></script>
-
 <script>
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
+   DYNAMIC SCRIPT LOADER — loads TF.js scripts one
+   by one and verifies each before continuing
+═══════════════════════════════════════════════════ */
+function loadScript(src){
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src=src; s.async=false;
+    s.onload=resolve;
+    s.onerror=()=>reject(new Error('Failed: '+src));
+    document.head.appendChild(s);
+  });
+}
+
+/* ═══════════════════════════════════════════════════
    ELEMENTS
-═══════════════════════════════════════════════════════ */
+═══════════════════════════════════════════════════ */
 const vid       = document.getElementById('vid');
 const cv        = document.getElementById('cv');
 const ctx       = cv.getContext('2d');
@@ -140,10 +128,18 @@ const handCount = document.getElementById('hand-count');
 function resize(){ cv.width=innerWidth; cv.height=innerHeight; }
 resize(); addEventListener('resize',resize);
 
-/* ═══════════════════════════════════════════════════════
-   AUDIO — harp + reverb
-═══════════════════════════════════════════════════════ */
-let AC=null, revNode=null;
+function setProgress(pct,msg){ lbar.style.width=pct+'%'; bootLmsg.textContent=msg; }
+
+function showErr(html){
+  bootLoad.style.display='none';
+  bootErr.innerHTML=html; bootErr.style.display='block';
+  bootBtn.textContent='RETRY'; bootBtn.style.display='block';
+}
+
+/* ═══════════════════════════════════════════════════
+   AUDIO
+═══════════════════════════════════════════════════ */
+let AC=null,revNode=null;
 function initAudio(){
   if(AC) return;
   AC=new(window.AudioContext||window.webkitAudioContext)();
@@ -167,8 +163,7 @@ function freqOf(len){
 function pluckSound(freq,vel){
   if(!AC||AC.state==='suspended') return;
   const g=AC.createGain();
-  const vol=Math.min(vel*.5,0.55);
-  g.gain.setValueAtTime(vol,AC.currentTime);
+  g.gain.setValueAtTime(Math.min(vel*.5,0.55),AC.currentTime);
   g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+4);
   [[1,.6],[2,.25],[3,.1],[4,.04]].forEach(([m,a])=>{
     const o=AC.createOscillator(); o.type='sine'; o.frequency.value=freq*m;
@@ -181,268 +176,170 @@ function pluckSound(freq,vel){
   g.connect(wet); wet.connect(getRev());
 }
 
-/* ═══════════════════════════════════════════════════════
-   PARTICLES — magic sparks on pluck
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   PARTICLES
+═══════════════════════════════════════════════════ */
 const particles=[];
 function spawnParticles(x,y,col,count=12){
   for(let i=0;i<count;i++){
-    const angle=Math.random()*Math.PI*2;
+    const a=Math.random()*Math.PI*2;
     const spd=1.5+Math.random()*4;
-    particles.push({
-      x,y,
-      vx:Math.cos(angle)*spd,
-      vy:Math.sin(angle)*spd,
-      life:1, decay:0.025+Math.random()*0.03,
-      size:1.5+Math.random()*2.5,
-      col
-    });
+    particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,
+      life:1,decay:0.025+Math.random()*0.03,
+      size:1.5+Math.random()*2.5,col});
   }
 }
-function updateParticles(){
+function tickParticles(){
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];
-    p.x+=p.vx; p.y+=p.vy;
-    p.vy+=0.04; // gravity
-    p.life-=p.decay;
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.04; p.life-=p.decay;
     if(p.life<=0) particles.splice(i,1);
   }
 }
 function drawParticles(){
   particles.forEach(p=>{
     ctx.save();
-    ctx.globalAlpha=p.life*0.9;
+    ctx.globalAlpha=p.life*.9;
     ctx.fillStyle=p.col;
-    ctx.shadowColor=p.col;
-    ctx.shadowBlur=8;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);
-    ctx.fill();
+    ctx.shadowColor=p.col; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2); ctx.fill();
     ctx.restore();
   });
 }
 
-/* ═══════════════════════════════════════════════════════
-   STRING — white elastic, physics
-═══════════════════════════════════════════════════════ */
-// Accent colors just for glow — string core stays white
-const ACCENTS=['#7dd3fc','#c4b5fd','#86efac','#f9a8d4','#fde68a','#a5f3fc','#ddd6fe'];
+/* ═══════════════════════════════════════════════════
+   STRING
+═══════════════════════════════════════════════════ */
+const ACCENTS=['#7dd3fc','#c4b5fd','#86efac','#f9a8d4','#fde68a','#a5f3fc','#ddd6fe','#fb7185'];
 function randAccent(){ return ACCENTS[Math.floor(Math.random()*ACCENTS.length)]; }
 
 class Str {
   constructor(x1,y1,x2,y2){
     this.x1=x1;this.y1=y1;this.x2=x2;this.y2=y2;
-    this.amp=0; this.ph=0;
-    this.vf=8+Math.random()*6;
-    this.decay=0.89; this.cd=0;
+    this.amp=0; this.ph=0; this.vf=8+Math.random()*6;
+    this.decay=.89; this.cd=0;
     this.lastLen=Math.hypot(x2-x1,y2-y1);
     this.accent=randAccent();
-    // midpoint velocity for elasticity
-    this.mx=(x1+x2)/2; this.my=(y1+y2)/2;
-    this.mvx=0; this.mvy=0;
   }
-
   update(x1,y1,x2,y2){
     const len=Math.hypot(x2-x1,y2-y1);
     const dl=this.lastLen-len;
-
     if(dl>12&&this.cd<=0){
-      this.amp=Math.min(1,dl/45);
-      this.ph=0; this.cd=12;
+      this.amp=Math.min(1,dl/45); this.ph=0; this.cd=12;
       pluckSound(freqOf(len),this.amp);
-      // spark at midpoint
-      const mx=(x1+x2)/2, my=(y1+y2)/2;
-      spawnParticles(mx,my,this.accent,10+Math.floor(this.amp*14));
+      spawnParticles((x1+x2)/2,(y1+y2)/2,this.accent,10+Math.floor(this.amp*14));
     }
-
     this.lastLen=len;
     this.x1=x1;this.y1=y1;this.x2=x2;this.y2=y2;
-    this.ph+=this.vf/30;
-    this.amp*=this.decay;
+    this.ph+=this.vf/30; this.amp*=this.decay;
     if(this.cd>0) this.cd--;
   }
-
   draw(){
     const len=Math.hypot(this.x2-this.x1,this.y2-this.y1);
     if(len<4) return;
-
-    const mx=(this.x1+this.x2)/2;
-    const my=(this.y1+this.y2)/2;
+    const mx=(this.x1+this.x2)/2, my=(this.y1+this.y2)/2;
     const inv=1/(len||1);
-    const nx=-(this.y2-this.y1)*inv;
-    const ny=(this.x2-this.x1)*inv;
-
-    // Natural sag + oscillation
-    const sag=len*0.032;
-    const osc=this.amp*28*Math.sin(this.ph);
-    const cpx=mx+nx*(sag+osc);
-    const cpy=my+ny*(sag+osc);
-
-    ctx.save();
-    ctx.lineCap='round';
-
-    // === Pass 1: coloured outer glow (only when vibrating) ===
+    const nx=-(this.y2-this.y1)*inv, ny=(this.x2-this.x1)*inv;
+    const offset=len*.032+this.amp*28*Math.sin(this.ph);
+    const cpx=mx+nx*offset, cpy=my+ny*offset;
+    ctx.save(); ctx.lineCap='round';
     if(this.amp>0.025){
       ctx.globalAlpha=Math.min(0.2,this.amp*0.25);
-      ctx.strokeStyle=this.accent;
-      ctx.lineWidth=12+this.amp*18;
-      ctx.shadowColor=this.accent;
-      ctx.shadowBlur=30+this.amp*20;
-      ctx.beginPath();
-      ctx.moveTo(this.x1,this.y1);
-      ctx.quadraticCurveTo(cpx,cpy,this.x2,this.y2);
-      ctx.stroke();
+      ctx.strokeStyle=this.accent; ctx.lineWidth=12+this.amp*18;
+      ctx.shadowColor=this.accent; ctx.shadowBlur=30+this.amp*20;
+      ctx.beginPath(); ctx.moveTo(this.x1,this.y1);
+      ctx.quadraticCurveTo(cpx,cpy,this.x2,this.y2); ctx.stroke();
     }
-
-    // === Pass 2: white soft glow ===
     ctx.globalAlpha=Math.max(0.15,Math.min(0.4,0.18+this.amp*0.3));
-    ctx.strokeStyle='rgba(220,235,255,0.6)';
-    ctx.lineWidth=3.5+this.amp*4;
-    ctx.shadowColor='rgba(180,210,255,0.8)';
-    ctx.shadowBlur=12+this.amp*10;
-    ctx.beginPath();
-    ctx.moveTo(this.x1,this.y1);
-    ctx.quadraticCurveTo(cpx,cpy,this.x2,this.y2);
-    ctx.stroke();
-
-    // === Pass 3: bright white core string ===
+    ctx.strokeStyle='rgba(220,235,255,0.6)'; ctx.lineWidth=3.5+this.amp*4;
+    ctx.shadowColor='rgba(180,210,255,0.8)'; ctx.shadowBlur=12+this.amp*10;
+    ctx.beginPath(); ctx.moveTo(this.x1,this.y1);
+    ctx.quadraticCurveTo(cpx,cpy,this.x2,this.y2); ctx.stroke();
     ctx.globalAlpha=Math.max(0.7,Math.min(1.0,0.75+this.amp*0.25));
-    ctx.strokeStyle='#ffffff';
-    ctx.lineWidth=1.0+this.amp*0.6;
-    ctx.shadowColor=this.accent;
-    ctx.shadowBlur=3+this.amp*5;
-    ctx.beginPath();
-    ctx.moveTo(this.x1,this.y1);
-    ctx.quadraticCurveTo(cpx,cpy,this.x2,this.y2);
-    ctx.stroke();
-
+    ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.0+this.amp*0.6;
+    ctx.shadowColor=this.accent; ctx.shadowBlur=3+this.amp*5;
+    ctx.beginPath(); ctx.moveTo(this.x1,this.y1);
+    ctx.quadraticCurveTo(cpx,cpy,this.x2,this.y2); ctx.stroke();
     ctx.restore();
   }
 }
 
-/* ═══════════════════════════════════════════════════════
-   FINGERTIP NODE — scanner dot with rings
-═══════════════════════════════════════════════════════ */
-let scanPulse=0; // global pulse animation
-
-function drawNode(x,y,col,active,label){
+/* ═══════════════════════════════════════════════════
+   NODE RENDERER
+═══════════════════════════════════════════════════ */
+let scanPulse=0;
+function drawNode(x,y,col,active){
   ctx.save();
   const t=scanPulse;
-
-  // === Outer scanning ring (rotates) ===
   const ringR=active?20:14;
   ctx.globalAlpha=active?0.55:0.3;
-  ctx.strokeStyle=col;
-  ctx.lineWidth=0.8;
-  ctx.shadowColor=col;
-  ctx.shadowBlur=8;
-  // dashed arc effect
+  ctx.strokeStyle=col; ctx.lineWidth=0.8;
+  ctx.shadowColor=col; ctx.shadowBlur=8;
   for(let i=0;i<6;i++){
-    const a0=(i/6)*Math.PI*2 + t*2;
-    const a1=a0+Math.PI*0.25;
-    ctx.beginPath();
-    ctx.arc(x,y,ringR,a0,a1);
-    ctx.stroke();
+    const a0=(i/6)*Math.PI*2+t*2, a1=a0+Math.PI*0.25;
+    ctx.beginPath(); ctx.arc(x,y,ringR,a0,a1); ctx.stroke();
   }
-
-  // === Second inner ring (counter-rotate) ===
   const r2=active?13:9;
-  ctx.globalAlpha=active?0.4:0.2;
-  ctx.lineWidth=0.6;
+  ctx.globalAlpha=active?0.4:0.2; ctx.lineWidth=0.6;
   for(let i=0;i<4;i++){
-    const a0=(i/4)*Math.PI*2 - t*3;
-    const a1=a0+Math.PI*0.35;
-    ctx.beginPath();
-    ctx.arc(x,y,r2,a0,a1);
-    ctx.stroke();
+    const a0=(i/4)*Math.PI*2-t*3, a1=a0+Math.PI*0.35;
+    ctx.beginPath(); ctx.arc(x,y,r2,a0,a1); ctx.stroke();
   }
-
-  // === Pulse glow circle ===
-  const pulseR=active ? (10+Math.sin(t*4)*3) : 7;
-  ctx.beginPath();
-  ctx.arc(x,y,pulseR,0,Math.PI*2);
-  ctx.fillStyle=col;
-  ctx.globalAlpha=active?0.1:0.06;
-  ctx.shadowBlur=active?20:10;
-  ctx.fill();
-
-  // === Core dot ===
-  ctx.beginPath();
-  ctx.arc(x,y,active?4:2.8,0,Math.PI*2);
-  ctx.fillStyle='#ffffff';
-  ctx.globalAlpha=1;
-  ctx.shadowColor=col;
-  ctx.shadowBlur=active?10:5;
-  ctx.fill();
-
-  // === Bright accent ring ===
-  ctx.beginPath();
-  ctx.arc(x,y,active?5.5:3.8,0,Math.PI*2);
-  ctx.strokeStyle=col;
-  ctx.lineWidth=1;
-  ctx.globalAlpha=active?0.9:0.5;
-  ctx.shadowBlur=6;
-  ctx.stroke();
-
-  // === Cross-hair ticks ===
+  ctx.beginPath(); ctx.arc(x,y,active?10+Math.sin(t*4)*3:7,0,Math.PI*2);
+  ctx.fillStyle=col; ctx.globalAlpha=active?0.1:0.06;
+  ctx.shadowBlur=active?20:10; ctx.fill();
+  ctx.beginPath(); ctx.arc(x,y,active?4:2.8,0,Math.PI*2);
+  ctx.fillStyle='#ffffff'; ctx.globalAlpha=1;
+  ctx.shadowColor=col; ctx.shadowBlur=active?10:5; ctx.fill();
+  ctx.beginPath(); ctx.arc(x,y,active?5.5:3.8,0,Math.PI*2);
+  ctx.strokeStyle=col; ctx.lineWidth=1;
+  ctx.globalAlpha=active?0.9:0.5; ctx.shadowBlur=6; ctx.stroke();
   const cr=active?24:16, ct=5;
-  ctx.globalAlpha=active?0.6:0.25;
-  ctx.lineWidth=0.7;
-  ctx.shadowBlur=4;
+  ctx.globalAlpha=active?0.6:0.25; ctx.lineWidth=0.7; ctx.shadowBlur=4;
   ctx.beginPath();
   ctx.moveTo(x,y-cr); ctx.lineTo(x,y-cr+ct);
   ctx.moveTo(x,y+cr); ctx.lineTo(x,y+cr-ct);
   ctx.moveTo(x-cr,y); ctx.lineTo(x-cr+ct,y);
   ctx.moveTo(x+cr,y); ctx.lineTo(x+cr-ct,y);
   ctx.stroke();
-
   ctx.restore();
 }
 
-/* ═══════════════════════════════════════════════════════
-   TRACKING STATE
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   TRACKING
+═══════════════════════════════════════════════════ */
 const TIP_IDX=[4,8,12,16,20];
-const TIP_NAMES=['THUMB','INDEX','MIDDLE','RING','PINKY'];
 const strs=new Map();
 const prev={};
 const tipCols={};
 let lastPts=[];
-let handCountNum=0;
 
 function skey(a,b){ return a<b?`${a}|${b}`:`${b}|${a}`; }
 
 function onPredictions(predictions){
-  handCountNum=predictions.length;
-  handCount.textContent=`HANDS: ${handCountNum}`;
-
+  handCount.textContent='HANDS: '+predictions.length;
   const pts=[];
   predictions.forEach((hand,hi)=>{
-    TIP_IDX.forEach((ti,idx)=>{
+    TIP_IDX.forEach(ti=>{
       const pk=`${hi}:${ti}`;
-      if(!tipCols[pk]){
-        tipCols[pk]=ACCENTS[Math.floor(Math.random()*ACCENTS.length)];
-      }
+      if(!tipCols[pk]) tipCols[pk]=ACCENTS[Math.floor(Math.random()*ACCENTS.length)];
       const lm=hand.landmarks[ti];
-      const x=(1-lm[0]/vid.videoWidth)*cv.width;
-      const y=(lm[1]/vid.videoHeight)*cv.height;
-      pts.push({pk,x,y,col:tipCols[pk],label:TIP_NAMES[idx]});
+      pts.push({pk,
+        x:(1-lm[0]/vid.videoWidth)*cv.width,
+        y:(lm[1]/vid.videoHeight)*cv.height,
+        col:tipCols[pk]});
     });
   });
   lastPts=pts;
-
   const active=new Set();
   for(let i=0;i<pts.length;i++){
     for(let j=i+1;j<pts.length;j++){
-      const a=pts[i], b=pts[j];
-      const k=skey(a.pk,b.pk);
-      active.add(k);
+      const a=pts[i],b=pts[j];
+      const k=skey(a.pk,b.pk); active.add(k);
       if(!strs.has(k)) strs.set(k,new Str(a.x,a.y,b.x,b.y));
       strs.get(k).update(a.x,a.y,b.x,b.y);
     }
   }
-
-  // Swipe strum
   pts.forEach(p=>{
     const pv=prev[p.pk];
     if(pv){
@@ -450,63 +347,41 @@ function onPredictions(predictions){
       if(spd>20){
         strs.forEach((s,k)=>{
           if(k.includes(p.pk)&&s.amp<.1){
-            s.amp=Math.min(.65,spd/60);
-            s.ph=0; s.cd=10;
-            const mx=(s.x1+s.x2)/2, my=(s.y1+s.y2)/2;
+            s.amp=Math.min(.65,spd/60); s.ph=0; s.cd=10;
             pluckSound(freqOf(Math.hypot(s.x2-s.x1,s.y2-s.y1)),s.amp);
-            spawnParticles(mx,my,s.accent,8);
+            spawnParticles((s.x1+s.x2)/2,(s.y1+s.y2)/2,s.accent,8);
           }
         });
       }
     }
     prev[p.pk]={x:p.x,y:p.y};
   });
-
   strs.forEach((_,k)=>{ if(!active.has(k)) strs.delete(k); });
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
    RENDER LOOP
-═══════════════════════════════════════════════════════ */
-let frame=0;
+═══════════════════════════════════════════════════ */
 (function loop(){
   requestAnimationFrame(loop);
-  frame++;
   scanPulse+=0.04;
-
-  // Fully transparent canvas — camera shows through perfectly
   ctx.clearRect(0,0,cv.width,cv.height);
-
-  // Ultra subtle edge vignette — just 15% darkening at edges
-  const vig=ctx.createRadialGradient(
-    cv.width*.5,cv.height*.5,cv.height*.4,
-    cv.width*.5,cv.height*.5,cv.height*.85
-  );
+  const vig=ctx.createRadialGradient(cv.width*.5,cv.height*.5,cv.height*.4,cv.width*.5,cv.height*.5,cv.height*.85);
   vig.addColorStop(0,'rgba(0,0,0,0)');
   vig.addColorStop(1,'rgba(0,0,8,0.15)');
-  ctx.fillStyle=vig;
-  ctx.fillRect(0,0,cv.width,cv.height);
-
-  // Draw all strings
+  ctx.fillStyle=vig; ctx.fillRect(0,0,cv.width,cv.height);
   strs.forEach(s=>s.draw());
-
-  // Draw particles
-  updateParticles();
-  drawParticles();
-
-  // Draw fingertip nodes on top of everything
+  tickParticles(); drawParticles();
   lastPts.forEach(p=>{
     let active=false;
-    strs.forEach((s,k)=>{
-      if(k.includes(p.pk)&&s.amp>0.06) active=true;
-    });
-    drawNode(p.x,p.y,p.col,active,p.label);
+    strs.forEach((s,k)=>{ if(k.includes(p.pk)&&s.amp>0.06) active=true; });
+    drawNode(p.x,p.y,p.col,active);
   });
 })();
 
-/* ═══════════════════════════════════════════════════════
-   BOOT SEQUENCE
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   BOOT — loads scripts dynamically then starts
+═══════════════════════════════════════════════════ */
 let model=null, running=false;
 
 async function detectLoop(){
@@ -520,35 +395,31 @@ async function detectLoop(){
   requestAnimationFrame(detectLoop);
 }
 
-function showErr(html){
-  bootLoad.style.display='none';
-  bootErr.innerHTML=html;
-  bootErr.style.display='block';
-  bootBtn.textContent='RETRY'; bootBtn.style.display='block';
-}
-
-function setProgress(pct,msg){
-  lbar.style.width=pct+'%';
-  bootLmsg.textContent=msg;
-}
-
 bootBtn.addEventListener('click', async()=>{
   initAudio();
   bootBtn.style.display='none';
   bootErr.style.display='none';
   bootLoad.style.display='flex';
 
-  // Check scripts loaded
-  setProgress(10,'Checking libraries…');
-  await new Promise(r=>setTimeout(r,300));
-
-  if(typeof handpose==='undefined'){
-    showErr('Scripts still loading — wait 10 seconds and click Retry.<br>Make sure internet is connected.');
+  // Step 1 — Load TF.js scripts dynamically
+  setProgress(10,'Loading TensorFlow…');
+  try{
+    await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@3.21.0/dist/tf-core.min.js');
+    await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@3.21.0/dist/tf-converter.min.js');
+    await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@3.21.0/dist/tf-backend-webgl.min.js');
+    await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose@0.1.7/dist/handpose.min.js');
+  }catch(e){
+    showErr('Failed to load libraries.<br>Check your internet and click Retry.<br><small style="opacity:.6">'+e.message+'</small>');
     return;
   }
 
-  // Camera
-  setProgress(25,'Connecting camera…');
+  if(typeof handpose==='undefined'){
+    showErr('Library load incomplete.<br>Click Retry.');
+    return;
+  }
+
+  // Step 2 — Camera
+  setProgress(30,'Connecting camera…');
   let stream;
   try{
     stream=await navigator.mediaDevices.getUserMedia({
@@ -556,11 +427,11 @@ bootBtn.addEventListener('click', async()=>{
     });
   }catch(e){
     if(e.name==='NotAllowedError'||e.name==='PermissionDeniedError'){
-      showErr('Camera access denied.<br>Click the camera icon in your address bar → Allow → refresh.');
+      showErr('Camera access denied.<br>Click the camera icon in address bar → Allow → refresh.');
     }else if(e.name==='NotFoundError'){
       showErr('No camera found on this device.');
     }else{
-      showErr('Camera error: '+e.message+'<br>Make sure you opened via http://localhost:8080');
+      showErr('Camera error: '+e.message);
     }
     return;
   }
@@ -569,32 +440,27 @@ bootBtn.addEventListener('click', async()=>{
   await new Promise(r=>{vid.onloadedmetadata=r;});
   try{ await vid.play(); }catch(_){}
 
-  // TF backend
-  setProgress(45,'Initialising WebGL…');
+  // Step 3 — WebGL backend
+  setProgress(55,'Initialising WebGL…');
   try{
     await tf.setBackend('webgl');
     await tf.ready();
   }catch(e){
-    showErr('WebGL init failed: '+e.message);
+    showErr('WebGL failed: '+e.message);
     return;
   }
 
-  // Load model
-  setProgress(65,'Loading neural hand model…');
+  // Step 4 — Hand model
+  setProgress(75,'Loading hand model…');
   try{
-    model=await handpose.load({
-      detectionConfidence:0.8,
-      maxContinuousChecks:10
-    });
+    model=await handpose.load({detectionConfidence:0.8,maxContinuousChecks:10});
   }catch(e){
-    showErr('Hand model failed to load.<br>'+e.message+'<br>Check internet connection and refresh.');
+    showErr('Hand model failed: '+e.message);
     return;
   }
 
   setProgress(100,'System online');
-  await new Promise(r=>setTimeout(r,400));
-
-  // Hide boot
+  await new Promise(r=>setTimeout(r,500));
   bootEl.style.opacity='0';
   setTimeout(()=>{ bootEl.style.display='none'; },900);
   hudTop.textContent='STARK INDUSTRIES · SYSTEM ONLINE · TRACKING ACTIVE';
